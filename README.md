@@ -20,6 +20,15 @@ Each row in the pipeline file has been converted into an execution step with the
 
 - Hydra configuration files under `exp_config/llama/` and accelerator config under `acc_config/fsdp.yaml`.
 
+## Dataset Availability
+
+A **sample dataset** is included in this repository to help you quickly understand and run the PRISMA pipeline.
+
+For access to the **full dataset**, please use the following link:
+[INSERT DATASET LINK HERE]
+
+> Note: The full dataset is significantly larger and is recommended for complete experiments and benchmarking.
+
 ## Pipeline Summary
 
 The pipeline is organized into three main phases:
