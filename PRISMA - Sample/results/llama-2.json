@@ -1,0 +1,26 @@
+{
+    "dpo-1": {
+        "test@1": {
+            "accuracy": 0.0,
+            "BERTScore": 0.0,
+            "Perplexity": 0.0,
+            "BLEU": 0.0,
+            "METEOR": 0.0,
+            "ROUGE-L": 0.0
+        },
+        "dev@1": {
+            "accuracy": 0.0,
+            "BERTScore": 0.0,
+            "Perplexity": 0.0,
+            "BLEU": 0.0,
+            "METEOR": 0.0,
+            "ROUGE-L": 0.0
+        },
+        "train@3": "0.0",
+        "generated_sft_data": 0
+    },
+    "sft-0": {
+        "train@5": "0.0",
+        "generated_dpo_data": 0
+    }
+}
