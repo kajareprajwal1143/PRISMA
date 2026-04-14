@@ -27,8 +27,6 @@ A **sample dataset** is included in this repository to help you quickly understa
 For access to the **full dataset**, please use the following link:
 [INSERT DATASET LINK HERE]
 
-> Note: The full dataset is significantly larger and is recommended for complete experiments and benchmarking.
-
 ## Pipeline Summary
 
 The pipeline is organized into three main phases:
