@@ -41,7 +41,7 @@ The pipeline is organized into three main phases:
 | 1 | Activating the virtual env | - | - | `conda activate trl_env` | - | - |
 | 2 | Changing the working directory | - | - | `cd /DPO-ST-P/dpo-st-cop` | - | - |
 | 3 | Setting the Configurations for training the LLAMA model | - | Training config from acc_config/fsdp.yaml | `ACC_CONFIG='acc_config/fsdp.yaml'` | - | - |
-| 4 | Fine-tuning LLAMA model on GSM8K Dataset | sft.py | fine-tuning settings from exp_config/llama/sft-0.yaml | `accelerate launch --config_file $ACC_CONFIG sft.py --config-path=exp_config/llama --config-name=sft-0` | Pretrained Language model and the training data | All output weights of the fine-tuned model are in folder /home/priyanshu/dpo-st/ft_models/llama-2/sft-0 |
+| 4 | Fine-tuning LLAMA model on GSM8K Dataset | sft.py | fine-tuning settings from exp_config/llama/sft-0.yaml | `accelerate launch --config_file $ACC_CONFIG sft.py --config-path=exp_config/llama --config-name=sft-0` | Pretrained Language model and the training data | All output weights of the fine-tuned model are in folder /DPO-ST-P/dpo-st-cop/ft_models/llama-2/sft-0 |
 | 5 | Setting arguments ARGS for generating Pseudo-labels | - | Generating 5 pseudo-labels for each sample | `ARGS='+data.split="train" eval.mode="sampling" eval.sampling.max_seed=5'` | - | - |
 | 6 | Generating 5 pseudo-labels for each sample | generate_1.py | Hydra config from sft-0.yaml | `torchrun_path --nproc_per_node 8 generate_1.py --config-path=exp_config/llama --config-name=sft-0 $ARGS` | /DPO-ST-P/dpo-st-copy/gsm8k/train.jsonl | /DPO-ST-P/dpo-st-copy/model_outputs_nego_all/llama-2/sft-0/train/seed_{i}-t_0.7.json<br><br>Total 5 generations for different <br>{i: 0, 1, 2, 3, 4} |
 | 7 | Evaluating the generations and generating positive and negative generations | eval_sampling-1.py | Hydra config from sft-0.yaml | `python eval_sampling-1.py --config-name=sft-0 $ARGS` | /DPO-ST-P/dpo-st-copy/model_outputs_nego_all/llama-2/sft-0/train/seed_{i}-t_0.7.json<br><br>Total 5 generations for different<br>{i: 0, 1, 2, 3, 4}<br><br>and the gsm8k/train.jsonl Gold data | model_outputs_nego_all/llama-2/sft-0/train/train_dpo_data.jsonl<br>and results/llama-2.json |
@@ -74,7 +74,7 @@ cd /DPO-ST-P/dpo-st-cop
 ### 2. Base model fine-tuning
 
 The first training stage fine-tunes LLaMA on GSM8K using `sft.py` with the `sft-0` Hydra configuration and `accelerate`.
-The resulting checkpoint folder is reported as `/home/priyanshu/dpo-st/ft_models/llama-2/sft-0`.
+The resulting checkpoint folder is reported as `/DPO-ST-P/dpo-st-cop/ft_models/llama-2/sft-0`.
 
 ```bash
 ACC_CONFIG='acc_config/fsdp.yaml'
@@ -135,7 +135,7 @@ python eval_sampling-1.py --config-path=exp_config/llama --config-name=dpo-1 $AR
 `utils/make_rft_data-1.py` transforms the DPO outputs into the reward fine-tuning (RFT) dataset format.
 
 ```bash
-python utils/make_rft_data-1.py --config-path=/DPO-ST-P/dpo-st-copy/exp_config/llama --config-name=dpo-1
+python utils/make_rft_data-1.py --config-path=/home/priyanshu/Prajwal/DPO-ST-P/dpo-st-copy/exp_config/llama --config-name=dpo-1
 ```
 
 ### 9. Final SFT training
@@ -163,7 +163,7 @@ python eval_greedy-1.py --config-path=$CONFIG_PATH --config-name=dpo-1 +data.spl
 
 ## Output Locations
 
-- Fine-tuned SFT checkpoint: `/home/priyanshu/dpo-st/ft_models/llama-2/sft-0`
+- Fine-tuned SFT checkpoint: `/DPO-ST-P/dpo-st-cop/ft_models/llama-2/sft-0`
 - SFT sampling outputs: `model_outputs_nego_all/llama-2/sft-0/train/`
 - Raw DPO data: `model_outputs_nego_all/llama-2/sft-0/train/train_dpo_data.jsonl`
 - Processed DPO data: `model_outputs_nego_all/llama2/sft-0/train/train_dpo_processed.jsonl` and `model_outputs_nego_all/llama2/sft-0/train/eval_dpo_processed.jsonl`
