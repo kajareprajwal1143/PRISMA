@@ -12,7 +12,7 @@ Each row in the pipeline file has been converted into an execution step with the
 
 - A working Conda environment named `trl_env`.
 
-- Access to the project directory: `/home/priyanshu/Prajwal/DPO-ST-P/dpo-st-cop`.
+- Access to the project directory: `/DPO-ST-P/dpo-st-cop`.
 
 - GPU-enabled training setup for `accelerate` and `torchrun`.
 
@@ -39,19 +39,19 @@ The pipeline is organized into three main phases:
 | Step | Task | Script | Configuration | Command | Inputs | Outputs |
 |---|---|---|---|---|---|---|
 | 1 | Activating the virtual env | - | - | `conda activate trl_env` | - | - |
-| 2 | Changing the working directory | - | - | `cd /home/priyanshu/Prajwal/DPO-ST-P/dpo-st-cop` | - | - |
+| 2 | Changing the working directory | - | - | `cd /DPO-ST-P/dpo-st-cop` | - | - |
 | 3 | Setting the Configurations for training the LLAMA model | - | Training config from acc_config/fsdp.yaml | `ACC_CONFIG='acc_config/fsdp.yaml'` | - | - |
 | 4 | Fine-tuning LLAMA model on GSM8K Dataset | sft.py | fine-tuning settings from exp_config/llama/sft-0.yaml | `accelerate launch --config_file $ACC_CONFIG sft.py --config-path=exp_config/llama --config-name=sft-0` | Pretrained Language model and the training data | All output weights of the fine-tuned model are in folder /home/priyanshu/dpo-st/ft_models/llama-2/sft-0 |
 | 5 | Setting arguments ARGS for generating Pseudo-labels | - | Generating 5 pseudo-labels for each sample | `ARGS='+data.split="train" eval.mode="sampling" eval.sampling.max_seed=5'` | - | - |
-| 6 | Generating 5 pseudo-labels for each sample | generate_1.py | Hydra config from sft-0.yaml | `torchrun_path --nproc_per_node 8 generate_1.py --config-path=exp_config/llama --config-name=sft-0 $ARGS` | /home/priyanshu/Prajwal/DPO-ST-P/dpo-st-copy/gsm8k/train.jsonl | /home/priyanshu/Prajwal/DPO-ST-P/dpo-st-copy/model_outputs_nego_all/llama-2/sft-0/train/seed_{i}-t_0.7.json<br><br>Total 5 generations for different <br>{i: 0, 1, 2, 3, 4} |
-| 7 | Evaluating the generations and generating positive and negative generations | eval_sampling-1.py | Hydra config from sft-0.yaml | `python eval_sampling-1.py --config-name=sft-0 $ARGS` | /home/priyanshu/Prajwal/DPO-ST-P/dpo-st-copy/model_outputs_nego_all/llama-2/sft-0/train/seed_{i}-t_0.7.json<br><br>Total 5 generations for different<br>{i: 0, 1, 2, 3, 4}<br><br>and the gsm8k/train.jsonl Gold data | model_outputs_nego_all/llama-2/sft-0/train/train_dpo_data.jsonl<br>and results/llama-2.json |
-| 8 | The DPO data is then processed | utils/make_dpo_data-1.py | Hydra config from sft-0.yaml | `python utils/make_dpo_data-1.py --config-path=/home/priyanshu/Prajwal/DPO-ST-P/dpo-st-copy/exp_config/llama --config-name=sft-0` | model_outputs_nego_all/llama-2/sft-0/train/train_dpo_data.jsonl | model_outputs_nego_all/llama2/sft-0/train/train_dpo_processed.jsonl<br>model_outputs_nego_all/llama2/sft-0/train/eval_dpo_processed.jsonl |
+| 6 | Generating 5 pseudo-labels for each sample | generate_1.py | Hydra config from sft-0.yaml | `torchrun_path --nproc_per_node 8 generate_1.py --config-path=exp_config/llama --config-name=sft-0 $ARGS` | /DPO-ST-P/dpo-st-copy/gsm8k/train.jsonl | /DPO-ST-P/dpo-st-copy/model_outputs_nego_all/llama-2/sft-0/train/seed_{i}-t_0.7.json<br><br>Total 5 generations for different <br>{i: 0, 1, 2, 3, 4} |
+| 7 | Evaluating the generations and generating positive and negative generations | eval_sampling-1.py | Hydra config from sft-0.yaml | `python eval_sampling-1.py --config-name=sft-0 $ARGS` | /DPO-ST-P/dpo-st-copy/model_outputs_nego_all/llama-2/sft-0/train/seed_{i}-t_0.7.json<br><br>Total 5 generations for different<br>{i: 0, 1, 2, 3, 4}<br><br>and the gsm8k/train.jsonl Gold data | model_outputs_nego_all/llama-2/sft-0/train/train_dpo_data.jsonl<br>and results/llama-2.json |
+| 8 | The DPO data is then processed | utils/make_dpo_data-1.py | Hydra config from sft-0.yaml | `python utils/make_dpo_data-1.py --config-path=/DPO-ST-P/dpo-st-copy/exp_config/llama --config-name=sft-0` | model_outputs_nego_all/llama-2/sft-0/train/train_dpo_data.jsonl | model_outputs_nego_all/llama2/sft-0/train/train_dpo_processed.jsonl<br>model_outputs_nego_all/llama2/sft-0/train/eval_dpo_processed.jsonl |
 | 9 | Setting configurations for training SFT model with DPO objective | - | Config from acc_config/fsdp.yaml | `ACC_CONFIG='acc_config/fsdp.yaml'` | - | - |
 | 10 | Training the SFT model with DPO objective | dpo.py | Hydra config from dpo-1.yaml | `accelerate launch --config_file $ACC_CONFIG dpo.py --config-path=exp_config/llama --config-name=dpo-1` | model_outputs_nego_all/llama2/sft-0/train/train_dpo_processed.jsonl model_outputs_nego_all/llama2/sft-0/train/eval_dpo_processed.jsonl | DPO trained llama model |
 | 11 | Setting arguments for sampling pseudo-labels from DPO model | - | - | `ARGS='+data.split="train" eval.mode="sampling" eval.sampling.max_seed=3'` | - | - |
 | 12 | Setting arguments for sampling pseudo labels from DPO model | generate_1.py | Hydra config from dpo-1.yaml | `torchrun_path --nproc_per_node 1 generate_1.py --config-path=exp_config/llama --config-name=dpo-1 $ARGS` | DPO trained llama model,<br>gsm8k/train.yaml | model_outputs_nego_all/llama-2/dpo-1/train/seed_{i}-t_0.7.json<br><br>i=0, 1, 2 |
 | 13 | Evaluating the responses generated by dpo model with gold responses from train.jsonl | eval_sampling-1.py | Hydra config from dpo-1.yaml | `python eval_sampling-1.py --config-path=exp_config/llama --config-name=dpo-1 $ARGS` | model_outputs_nego_all/llama-2/dpo-1/train/seed_{i}-t_0.7.json<br>i=0, 1, 2<br>and gsm8k/train.jsonl the gold data | /model_outputs_nego_all/llama-2/dpo-1/train/train_dpo_data.jsonl |
-| 14 | Generate a Reward Fine-Tuning (RFT) training dataset from the outputs of multiple DPO (Direct Preference Optimization) training runs. | utils/make_rft_data-1.py | Hydra config from dpo-1.yaml | `python utils/make_rft_data-1.py --config-path=/home/priyanshu/Prajwal/DPO-ST-P/dpo-st-copy/exp_config/llama --config-name=dpo-1` | /model_outputs_nego_all/llama-2/dpo-1/train/train_dpo_data.jsonl | /model_outputs_nego_all/llama-2/dpo-1/train/train_rft_processed.jsonl |
+| 14 | Generate a Reward Fine-Tuning (RFT) training dataset from the outputs of multiple DPO (Direct Preference Optimization) training runs. | utils/make_rft_data-1.py | Hydra config from dpo-1.yaml | `python utils/make_rft_data-1.py --config-path=/DPO-ST-P/dpo-st-copy/exp_config/llama --config-name=dpo-1` | /model_outputs_nego_all/llama-2/dpo-1/train/train_dpo_data.jsonl | /model_outputs_nego_all/llama-2/dpo-1/train/train_rft_processed.jsonl |
 | 15 | Setting configurations for final SFT training | - | Config from acc_config/fsdp.yaml | `ACC_CONFIG='acc_config/fsdp.yaml'` | - | - |
 | 16 | SFT with labeled and pseudo labelled data | sft.py | Config from exp_config/llama/sft-1.yaml | `accelerate launch --config_file $ACC_CONFIG sft.py --config-path=exp_config/llama --config-name=sft-1` | /model_outputs_nego_all/llama-2/dpo-1/train/train_rft_processed.jsonl | The fine-tuned model |
 | 17 | Evaluation on test and dev sets | - | Config path exp_config/llama | `CONFIG_PATH='exp_config/llama'` | - | - |
@@ -68,7 +68,7 @@ Activate the Conda environment and move into the project directory before runnin
 
 ```bash
 conda activate trl_env
-cd /home/priyanshu/Prajwal/DPO-ST-P/dpo-st-cop
+cd /DPO-ST-P/dpo-st-cop
 ```
 
 ### 2. Base model fine-tuning
@@ -103,7 +103,7 @@ python eval_sampling-1.py --config-name=sft-0 $ARGS
 Then `utils/make_dpo_data-1.py` processes the raw DPO data into train/eval JSONL files.
 
 ```bash
-python utils/make_dpo_data-1.py --config-path=/home/priyanshu/Prajwal/DPO-ST-P/dpo-st-copy/exp_config/llama --config-name=sft-0
+python utils/make_dpo_data-1.py --config-path=/DPO-ST-P/dpo-st-copy/exp_config/llama --config-name=sft-0
 ```
 
 ### 5. DPO model training
@@ -135,7 +135,7 @@ python eval_sampling-1.py --config-path=exp_config/llama --config-name=dpo-1 $AR
 `utils/make_rft_data-1.py` transforms the DPO outputs into the reward fine-tuning (RFT) dataset format.
 
 ```bash
-python utils/make_rft_data-1.py --config-path=/home/priyanshu/Prajwal/DPO-ST-P/dpo-st-copy/exp_config/llama --config-name=dpo-1
+python utils/make_rft_data-1.py --config-path=/DPO-ST-P/dpo-st-copy/exp_config/llama --config-name=dpo-1
 ```
 
 ### 9. Final SFT training
