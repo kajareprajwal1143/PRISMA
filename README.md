@@ -25,7 +25,7 @@ Each row in the pipeline file has been converted into an execution step with the
 A **sample dataset** is included in this repository to help you quickly understand and run the PRISMA pipeline.
 
 For access to the **full dataset**, please use the following link:
-[INSERT DATASET LINK HERE]
+[https://ai-nlp-ml.github.io/resources.html]
 
 ## Pipeline Summary
 
